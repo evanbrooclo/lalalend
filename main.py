@@ -29,22 +29,21 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
         # Get the voice message file
         voice_file = await context.bot.get_file(update.message.voice.file_id)
-        
+
         # Create a temporary directory
         with tempfile.TemporaryDirectory() as temp_dir:
             # Download the voice message
             ogg_path = Path(temp_dir) / "voice.ogg"
             mp3_path = Path(temp_dir) / "voice.mp3"
-            
+
             # Download the voice file
             await voice_file.download_to_drive(str(ogg_path))
-            
+
             # Convert OGG to MP3 using ffmpeg
             try:
-                # Use subprocess to call ffmpeg directly
                 command = [
-                    'ffmpeg', 
-                    '-i', str(ogg_path), 
+                    'ffmpeg',
+                    '-i', str(ogg_path),
                     '-y',  # Overwrite output file if it exists
                     str(mp3_path)
                 ]
@@ -57,28 +56,26 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             except subprocess.CalledProcessError as e:
                 await update.message.reply_text(f"❌ Error converting audio: {e.stderr.decode()}")
                 return
-            
+
             # Transcribe using OpenAI's Whisper
             with open(mp3_path, "rb") as audio_file:
-                # Use asyncio to run the CPU-bound task in a thread pool
                 transcript = await asyncio.to_thread(
                     client.audio.transcriptions.create,
                     model="whisper-1",
                     file=audio_file
                 )
 
-        # Format the text in a copyable markdown format
-        # Escape special characters for MarkdownV2
-        escaped_text = transcript.text.replace('_', '\\_').replace('*', '\\*').replace('[', '\\[').replace(']', '\\]').replace('(', '\\(').replace(')', '\\)').replace('~', '\\~').replace('`', '\\`').replace('>', '\\>').replace('#', '\\#').replace('+', '\\+').replace('-', '\\-').replace('=', '\\=').replace('|', '\\|').replace('{', '\\{').replace('}', '\\}').replace('.', '\\.').replace('!', '\\!')
-        
-        # Delete the processing message
-        await processing_msg.delete()
-        
-        # Send only the code block message for one-click copying
-        await update.message.reply_text(
-            f"```\n{escaped_text}\n```",
-            parse_mode='MarkdownV2'
-        )
+            # Escape special characters for MarkdownV2
+            escaped_text = transcript.text.replace('_', '\\_').replace('*', '\\*').replace('[', '\\[').replace(']', '\\]').replace('(', '\\(').replace(')', '\\)').replace('~', '\\~').replace('`', '\\`').replace('>', '\\>').replace('#', '\\#').replace('+', '\\+').replace('-', '\\-').replace('=', '\\=').replace('|', '\\|').replace('{', '\\{').replace('}', '\\}').replace('.', '\\.').replace('!', '\\!')
+
+            # Delete the processing message
+            await processing_msg.delete()
+
+            # Send only the code block message for one-click copying
+            await update.message.reply_text(
+                f"``````",
+                parse_mode='MarkdownV2'
+            )
 
     except Exception as e:
         await update.message.reply_text(f"❌ Sorry, an error occurred: {str(e)}")
