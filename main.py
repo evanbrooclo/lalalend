@@ -66,7 +66,11 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
                 )
 
             # Escape special characters for MarkdownV2
-            escaped_text = transcript.text.replace('_', '\\_').replace('*', '\\*').replace('[', '\\[').replace(']', '\\]').replace('(', '\\(').replace(')', '\\)').replace('~', '\\~').replace('`', '\\`').replace('>', '\\>').replace('#', '\\#').replace('+', '\\+').replace('-', '\\-').replace('=', '\\=').replace('|', '\\|').replace('{', '\\{').replace('}', '\\}').replace('.', '\\.').replace('!', '\\!')
+            escaped_text = transcript.text.replace('_', '\\_').replace('*', '\\*')\
+                .replace('[', '\\[').replace(']', '\\]').replace('(', '\\(').replace(')', '\\)')\
+                .replace('~', '\\~').replace('`', '\\`').replace('>', '\\>').replace('#', '\\#')\
+                .replace('+', '\\+').replace('-', '\\-').replace('=', '\\=').replace('|', '\\|')\
+                .replace('{', '\\{').replace('}', '\\}').replace('.', '\\.').replace('!', '\\!')
 
             # Delete the processing message
             await processing_msg.delete()
